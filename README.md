@@ -166,8 +166,8 @@ Route::group(array('prefix' => '{locale}'), function()
             Route::resource('posts', 'AdminPostsController');
         });
     })->before('auth');
-```
 })->where('locale', '(en|fr)');
+```
 
 ## License
 
