@@ -1,6 +1,8 @@
 {
     "name": "jasonlewis/enhanced-router",
-    "description": "",
+    "description": "Enhanced Router is an extension to the Laravel 4 router and provides some enhanced functionality.",
+    "keywords": ["laravel", "router"],
+    "license": "BSD-2-Clause",
     "authors": [
         {
             "name": "Jason Lewis",
