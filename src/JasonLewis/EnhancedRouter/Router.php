@@ -15,6 +15,17 @@ class Router extends IlluminateRouter {
 	protected $routeGroups = array();
 
 	/**
+	 * An alias of the group method but without the attributes.
+	 * 
+	 * @param  Closure  $callback
+	 * @return \JasonLewis\EnhancedRouter\RouteGroup
+	 */
+	public function bunch(Closure $callback)
+	{
+		return $this->group(array(), $callback);
+	}
+
+	/**
 	 * Create a route group with shared attributes. Overloading this method allows
 	 * developers to chain requirements and filters to all routes within the
 	 * group.
