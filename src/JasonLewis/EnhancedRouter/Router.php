@@ -15,6 +15,31 @@ class Router extends IlluminateRouter {
 	protected $routeGroups = array();
 
 	/**
+	 * The HTTP verb to filter bindings.
+	 * 
+	 * @var array
+	 */
+	protected $httpVerbFilters = array();
+
+	/**
+	 * Tie a registered middleware to an HTTP verb or verbs.
+	 * 
+	 * @param  string|array  $verbs
+	 * @param  string|array  $names
+	 * @return void
+	 */
+	public function on($verbs, $names)
+	{
+		foreach ((array) $verbs as $verb)
+		{
+			foreach ((array) $names as $name)
+			{
+				$this->httpVerbFilters[strtolower($verb)][] = $name;
+			}
+		}
+	}
+
+	/**
 	 * An alias of the group method but without the attributes.
 	 * 
 	 * @param  Closure  $callback
@@ -119,6 +144,27 @@ class Router extends IlluminateRouter {
 		$after = array_unique(array_merge($route->getAfterFilters(), $group->getAfterFilters()));
 
 		$route->setOption('_after', $after);
+	}
+
+	/**
+	 * Find the patterned filters matching a request.
+	 * 
+	 * @param  \Symfony\Component\HttpFoundation\Request  $request
+	 * @return array
+	 */
+	public function findPatternFilters(Request $request)
+	{
+		$filters = parent::findPatternFilters($request);
+
+		foreach ($this->httpVerbFilters as $verb => $values)
+		{
+			if ($verb == strtolower($request->getMethod()))
+			{
+				$filters = array_merge($filters, $values);
+			}
+		}
+
+		return $filters;
 	}
 
 	/**

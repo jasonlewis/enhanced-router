@@ -1,6 +1,7 @@
 <?php
 
 use JasonLewis\EnhancedRouter\Router;
+use Symfony\Component\HttpFoundation\Request;
 
 class RoutingTest extends PHPUnit_Framework_TestCase {
 
@@ -101,6 +102,28 @@ class RoutingTest extends PHPUnit_Framework_TestCase {
 		$compiled = $routes[0]->compile();
 
 		$this->assertEquals('#^/(?P<foo>(bar|baz))/qux$#s', $compiled->getRegex());
+	}
+
+
+	public function testFiltersAreSetOnSpecificHttpVerbs()
+	{
+		$router = new Router;
+		$router->get('baz', function() { return 'qux'; });
+		$router->addFilter('foo', function() { return 'bar'; });
+		$router->on('get', 'foo');
+		$this->assertEquals('bar', $router->dispatch(Request::create('/baz', 'GET'))->getContent());
+	}
+
+
+	public function testArrayOfVerbsWorkCorrectly()
+	{
+		$router = new Router;
+		$router->get('baz', function() { return 'qux'; });
+		$router->post('san', function() { return 'tan'; });
+		$router->addFilter('foo', function() { return 'bar'; });
+		$router->on(['get', 'post'], 'foo');
+		$this->assertEquals('bar', $router->dispatch(Request::create('/baz', 'GET'))->getContent());
+		$this->assertEquals('bar', $router->dispatch(Request::create('/san', 'POST'))->getContent());
 	}
 
 
