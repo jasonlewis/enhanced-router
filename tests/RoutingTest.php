@@ -89,4 +89,19 @@ class RoutingTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	public function testArrayOfRequirementsAreTransformedIntoRegex()
+	{
+		$router = new Router;
+		$router->group(array('prefix' => '{foo}'), function() use ($router)
+		{
+			$router->get('qux', function() {});
+		})->where('foo', ['bar', 'baz']);
+		$routes = array_values($router->getRoutes()->getIterator()->getArrayCopy());
+
+		$compiled = $routes[0]->compile();
+		
+		$this->assertEquals('#^/(?P<foo>(bar|baz))/qux$#s', $compiled->getRegex());
+	}
+
+
 }

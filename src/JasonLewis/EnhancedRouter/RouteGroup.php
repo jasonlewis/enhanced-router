@@ -54,9 +54,10 @@ class RouteGroup {
 	 */
 	public function where($name, $expression = null)
 	{
-		// If the given expression is an array, convert to an expression
-		if(is_array($expression))
-			$expression = implode('|', $expression);
+		if (is_array($expression))
+		{
+			$expression = '('.implode('|', $expression).')';
+		}
 		
 		if (is_array($name)) return $this->setArrayOfWheres($name);
 

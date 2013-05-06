@@ -72,7 +72,6 @@ class Router extends IlluminateRouter {
 	 */
 	protected function mergeRouteGroups()
 	{
-		//s($this->routeGroups);
 		foreach ($this->routeGroups as $key => $group)
 		{
 			// Spin through every route and merge the group filters onto the route.
