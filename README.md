@@ -2,8 +2,6 @@
 
 Enhanced Router is an extension to the Laravel 4 router and provides some enhanced functionality.
 
-[![Build Status](https://travis-ci.org/jasonlewis/enhanced-router.png?branch=master)](https://travis-ci.org/jasonlewis/enhanced-router)
-
 ## Installation
 
 Add `jasonlewis/enhanced-router` to `composer.json`.
@@ -18,18 +16,21 @@ Run `composer update` to pull down the latest version of Enhanced Router. Now op
 
 That's it. You now have some enhanced functionality available to your routes.
 
-## Usage
+## Features
 
-### Route Groups
+- Set `where` requirements on route group prefixes and domains.
+- Use the `before` and `after` methods to apply filters to an entire route group.
+- Set filters to run on an HTTP verb or an array of HTTP verbs.
 
-Enhanced Router attempts to make route groups more consistent with that of an actual route. The following functionality is available to your route groups.
+## Using Enhanced Router
 
-- Set `where` requirements on prefixes and domains.
-- Use the `before` and `after` methods to apply filters to an entire group.
+Once you have the package installed and the service provider in your `providers` key you can begin using the features right away.
 
-#### Route Group Prefixes
+### Route Group Prefixes
 
-Let's say you're building an application that has localization support and you're currently prefixing all your routes with something like this.
+Using the Laravel 4 router there is no way to set a requirement on a prefix. What this means is that prefixes themselves are hard-coded. There are a number of real-world scenarios where being able to use variable prefixes is very useful.
+
+Let's say you're building an application that has localization support and you're currently prefixing all your routes with the locale.
 
 ```php
 Route::get('{locale}/about', function($locale)
@@ -42,10 +43,10 @@ Route::get('{locale}', function($locale)
     return 'Homepage';
 })->where('locale', '(en|fr)');
 ```
-    
-What happens when you add in localization support for Germany? Two routes wouldn't be so bad but imagine going through dozens of routes and adding "de" to the locale requirement. What a pain.
 
-With Enhanced Router you can apply the prefix as a requirement. Now you have something like this.
+For a small application this might suffice. But once your application gets quite large it can become a bit of a smell. And when it comes time to add another language you'll need to go through all the routes and add the language.
+
+Using Enhanced Router you can set the requirement itself on the group. This means you only need to define the requirement once, and adding languages in the future isn't so painful.
 
 ```php
 Route::group(array('prefix' => '{locale}'), function()
@@ -61,12 +62,14 @@ Route::group(array('prefix' => '{locale}'), function()
     });
 })->where('locale', '(en|fr)');
 ```
-    
-Now the requirement is being set on the group, and all routes within that group will have the prefix applied to them.
 
-#### Subdomain Routing
+#### Parameters
 
-Laravel 4 makes subdomain routing as easy as pie with route groups. The only problem is you either target a single domain or all subdomains.
+It's important to note that the locale is actually given to each route as a **parameter**. The parameter is also given to every method of every controller that is within the group. When your route requires a parameter of its own it will be given after the prefix parameter.
+
+### Subdomain Routing
+
+Using route groups in Laravel 4 you can specify the domain the group responds to. This is especially helpful when you want to route to a subdomain. Currently you can only route to a single subdomain or every subdomain.
 
 ```php
 Route::group(array('domain' => 'example.laravel.dev'), function()
@@ -80,7 +83,7 @@ Route::group(array('domain' => '{user}.laravel.dev'), function()
 });
 ```
     
-The first group will match `example.laravel.dev` and the second will match anything. This isn't always ideal. Enhanced Router also allows requirements to be set on the domain exactly like it does with prefixes.
+The first group will match `example.laravel.dev` and the second will match any subdomain. Using the exact same syntax as prefixes you can also set the requirement on the subdomain.
 
 ```php
 Route::group(array('domain' => '{user}.laravel.dev'), function()
@@ -89,11 +92,13 @@ Route::group(array('domain' => '{user}.laravel.dev'), function()
 })->where('user', '(jason|shawn)');
 ```
     
-Now the group will only match the subdomains `jason.laravel.dev` and `shawn.laravel.dev`. These are regular expressions remember, so you have a lot of power at your fingertips.
+Now the group will only match the subdomains `jason.laravel.dev` and `shawn.laravel.dev`.
 
-#### Filters
+### Filters
 
-Filters can now be applied to a group using the fluent syntax you might be familiar with from routes. The only downside here is that you still need to provide an array as the first parameter to the group.
+#### Route Groups
+
+Filters can now be applied to a group using the fluent syntax you might be familiar with from routes. The only thing to be aware of here is that you still need to provide an array as the first parameter to the group.
 
 ```php
 Route::group(array(), function()
@@ -116,7 +121,7 @@ Route::group(array(), function()
     
 The above example would trigger the `auth` filter first and then move on to the `csrf` filter if the matched route was within that group.
 
-Because of type hinting in the Laravel 4 router it was difficult to remove the blank array from the first parameter. If you aren't using a prefix or subdomain routing then you can use the new `bunch` method.
+Because of type hinting in the Laravel 4 router it's difficult to remove the empty array from the first parameter. If you aren't using a prefix or subdomain routing then you can use the new `bunch` method.
 
 ```php
 Route::bunch(function()
@@ -125,28 +130,29 @@ Route::bunch(function()
 })->before('auth');
 ```
     
-This method is the same as `group` except you don't have to pass in an array of attributes.
+This method is the same as `group` except you don't have to pass in an array as the first parameter.
 
-#### Parameter Order
+#### HTTP Verbs
 
-When you're nesting groups within groups that contain parameters it's important to keep in mind the order these parameters are given to nested methods or closures. Consider the following example.
+Enhanced Router allows you to apply filters to all routes for specific HTTP verbs. Consider an application where all `POST` requests require the `csrf` filter.
 
 ```php
-Route::group(array('prefix' => '{locale}'), function()
-{
-    Route::group(array('domain' => '{user}.laravel.dev'), function()
-    {
-        Route::get('/', function($locale, $user)
-        {
-        
-        });
-    });
-});
+Route::on('post', 'csrf');
 ```
-    
-Parameters are passed from the outermost group first. So the `$locale` parameter is given first followed by the `$user` parameter. It's always important to remember that as all controller methods will behave in a similar way.
 
-#### Examples
+Or you can use an array of verbs.
+
+```php
+Route::on(['post', 'put'], 'csrf');
+```
+
+You can also use an array of filters to apply.
+
+```php
+Route::on(['post', 'put'], ['csrf', 'auth']);
+```
+
+### More Examples
 
 This example shows how you can nest groups and use filters, domains, and prefixes all at once.
 
@@ -166,8 +172,18 @@ Route::group(array('prefix' => '{locale}'), function()
             Route::resource('posts', 'AdminPostsController');
         });
     })->before('auth');
-})->where('locale', '(en|fr)');
 ```
+})->where('locale', '(en|fr)');
+
+## Changes
+
+#### v1.0.1
+- Allow an array to be given as the expression and have it converted to a proper regular expression.
+- Added `on` method to apply filters on a given HTTP verb.
+
+#### v1.0.0
+
+Initial release.
 
 ## License
 
