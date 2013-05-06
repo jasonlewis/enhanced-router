@@ -172,8 +172,8 @@ Route::group(array('prefix' => '{locale}'), function()
             Route::resource('posts', 'AdminPostsController');
         });
     })->before('auth');
-```
 })->where('locale', '(en|fr)');
+```
 
 ## Changes
 
@@ -183,7 +183,7 @@ Route::group(array('prefix' => '{locale}'), function()
 
 #### v1.0.0
 
-Initial release.
+- Initial release.
 
 ## License
 
