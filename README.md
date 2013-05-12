@@ -2,6 +2,8 @@
 
 Enhanced Router is an extension to the Laravel 4 router and provides some enhanced functionality.
 
+[![Build Status](https://travis-ci.org/jasonlewis/enhanced-router.png?branch=master)](https://travis-ci.org/jasonlewis/enhanced-router)
+
 ## Installation
 
 Add `jasonlewis/enhanced-router` to `composer.json`.
