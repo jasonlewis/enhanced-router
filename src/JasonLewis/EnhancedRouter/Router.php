@@ -85,7 +85,7 @@ class Router extends IlluminateRouter {
 		// Reset the routes on the router to the original collection of routes that
 		// we cloned earlier. This way we don't end up with any double ups when
 		// the groups are merged later on.
-		$this->routes = $original;
+		// $this->routes = $original;
 
 		return $this->routeGroups[] = new RouteGroup($collection, count($this->groupStack));
 	}
@@ -97,6 +97,8 @@ class Router extends IlluminateRouter {
 	 */
 	protected function mergeRouteGroups()
 	{
+		$routes = $this->routes->all();
+
 		foreach ($this->routeGroups as $key => $group)
 		{
 			// Spin through every route and merge the group filters onto the route.
@@ -108,7 +110,6 @@ class Router extends IlluminateRouter {
 				// group, even if they are within other groups.
 				if ($group->getGroupDepth() > 0)
 				{
-					// For future reference this loop will start the iteration 
 					for ($i = count($this->routeGroups) - $group->getGroupDepth(); $i < count($this->routeGroups); ++$i)
 					{
 						$this->mergeGroupFilters($route, $this->routeGroups[$i]);
@@ -122,7 +123,14 @@ class Router extends IlluminateRouter {
 				$this->mergeGroupFilters($route, $group);
 			}
 
-			$this->routes->addCollection($group->getRoutes());
+			$routes = array_merge($routes, $group->getRoutes());
+		}
+
+		$this->routes = new RouteCollection;
+
+		foreach ($routes as $name => $route)
+		{
+			$this->routes->add($name, $route);
 		}
 
 		$this->routeGroups = array();

@@ -119,11 +119,21 @@ class RouteGroup {
 	}
 
 	/**
+	 * Return all the routes as an array.
+	 * 
+	 * @return array
+	 */
+	public function getRoutes()
+	{
+		return $this->routes->all();
+	}
+
+	/**
 	 * Retrieve the entire route collection.
 	 * 
 	 * @return \Symfony\Component\Routing\RouteCollection
 	 */
-	public function getRoutes()
+	public function getRouteCollection()
 	{
 		return $this->routes;
 	}

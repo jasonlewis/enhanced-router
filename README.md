@@ -161,21 +161,24 @@ Route::group(array('prefix' => '{locale}'), function()
 {
     Route::controller('auth', 'AuthController');
     
-    Route::group(array(), function()
+    Route::bunch(function()
     {
         Route::get('/', 'UserController@profile');
         
         Route::group(array('domain' => 'admin.laravel.dev'), function()
         {
-            Route::controller('/', 'AdminController');
-            
             Route::resource('posts', 'AdminPostsController');
+
+            Route::controller('/', 'AdminController');
         });
     })->before('auth');
 })->where('locale', '(en|fr)');
 ```
 
 ## Changes
+
+#### v1.0.2
+- Fixed bug that re-ordered routes that were defined in groups. Route order is now maintained correctly.
 
 #### v1.0.1
 - Allow an array to be given as the expression and have it converted to a proper regular expression.

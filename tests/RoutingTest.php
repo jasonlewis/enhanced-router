@@ -25,9 +25,9 @@ class RoutingTest extends PHPUnit_Framework_TestCase {
 		});
 		$routes = array_values($router->getRoutes()->getIterator()->getArrayCopy());
 
-		$this->assertEquals(array('foo', 'bar', 'baz'), $routes[0]->getOption('_before'));
+		$this->assertEquals(array('foo'), $routes[0]->getOption('_before'));
 		$this->assertEquals(array('foo', 'bar'), $routes[1]->getOption('_before'));
-		$this->assertEquals(array('foo'), $routes[2]->getOption('_before'));
+		$this->assertEquals(array('foo', 'bar', 'baz'), $routes[2]->getOption('_before'));
 	}
 
 
@@ -109,7 +109,7 @@ class RoutingTest extends PHPUnit_Framework_TestCase {
 	{
 		$router = new Router;
 		$router->get('baz', function() { return 'qux'; });
-		$router->addFilter('foo', function() { return 'bar'; });
+		$router->filter('foo', function() { return 'bar'; });
 		$router->on('get', 'foo');
 		$this->assertEquals('bar', $router->dispatch(Request::create('/baz', 'GET'))->getContent());
 	}
@@ -120,10 +120,24 @@ class RoutingTest extends PHPUnit_Framework_TestCase {
 		$router = new Router;
 		$router->get('baz', function() { return 'qux'; });
 		$router->post('san', function() { return 'tan'; });
-		$router->addFilter('foo', function() { return 'bar'; });
+		$router->filter('foo', function() { return 'bar'; });
 		$router->on(array('get', 'post'), 'foo');
 		$this->assertEquals('bar', $router->dispatch(Request::create('/baz', 'GET'))->getContent());
 		$this->assertEquals('bar', $router->dispatch(Request::create('/san', 'POST'))->getContent());
+	}
+
+
+	public function testOrderOfRoutesIsMaintainted()
+	{
+		$router = new Router;
+		$router->group(array('prefix' => 'foo'), function() use ($router)
+		{
+			$router->get('bar', function() {});
+		});
+		$router->get('baz', function() {});
+		$routes = array_keys($router->getRoutes()->all());
+
+		$this->assertEquals(array('get foo/bar', 'get baz'), $routes);
 	}
 
 
