@@ -267,7 +267,7 @@ class Router extends IlluminateRouter {
 		$nameControllerPart = lcfirst(preg_replace('/Controller.*/', '', $controller, 1));
 		$nameMethodPart = lcfirst(preg_replace('/(get|post|put|patch|delete)/', '', $method, 1));
 		
-		$name = $name ?: $nameControllerPart.'.'.$nameMethodPart;
+		$name = !$name and $nameMethodPart? $nameControllerPart.'.'.$nameMethodPart : $name;
 
 		return array('as' => $name, 'uses' => $controller.'@'.$method);
 	}
