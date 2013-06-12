@@ -212,4 +212,64 @@ class Router extends IlluminateRouter {
 		return $this->routeGroups;
 	}
 
+	/**
+	 * Route a controller to a URI with wildcard routing.
+	 *
+	 * @param  string  $uri
+	 * @param  string  $controller
+	 * @param  array   $names
+	 * @return \Illuminate\Routing\Route
+	 */
+	public function controller($uri, $controller, $names = array())
+	{
+		$routable = $this->getInspector()->getRoutable($controller, $uri);
+
+		// When a controller is routed using this method, we use Reflection to parse
+		// out all of the routable methods for the controller, then register each
+		// route explicitly for the developers, so reverse routing is possible.
+		foreach ($routable as $method => $routes)
+		{
+			foreach ($routes as $route)
+			{
+				$this->registerInspected($route, $controller, $method, $names[$method]);
+			}
+		}
+
+		$this->addFallthroughRoute($controller, $uri);
+	}
+
+	/**
+	 * Register an inspected controller route.
+	 *
+	 * @param  array   $route
+	 * @param  string  $controller
+	 * @param  string  $method
+	 * @param  array   $name
+	 * @return void
+	 */
+	protected function registerInspected($route, $controller, $method, &$name)
+	{
+		$action = $this->getControllerAction($controller, $method, $name);
+
+		$this->{$route['verb']}($route['uri'], $action);
+	}
+
+	/**
+	 * Get the action array for a controller route.
+	 *
+	 * @param  string  $controller
+	 * @param  string  $method
+	 * @param  string  $name
+	 * @return array
+	 */
+	protected function getControllerAction($controller, $method, $name)
+	{
+		$nameControllerPart = lcfirst(preg_replace('/Controller.*/', '', $controller, 1));
+		$nameMethodPart = lcfirst(preg_replace('/(get|post|put|patch|delete)/', '', $method, 1));
+		
+		$name = $name ?: $nameControllerPart.'.'.$nameMethodPart;
+
+		return array('as' => $name, 'uses' => $controller.'@'.$method);
+	}
+
 }
