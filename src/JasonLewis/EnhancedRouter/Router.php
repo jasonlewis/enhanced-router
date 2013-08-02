@@ -157,16 +157,17 @@ class Router extends IlluminateRouter {
 	/**
 	 * Find the patterned filters matching a request.
 	 * 
-	 * @param  \Symfony\Component\HttpFoundation\Request  $request
+	 * @param  string  $method
+	 * @param  string  $path
 	 * @return array
 	 */
-	public function findPatternFilters(Request $request)
+	public function findPatternFilters($method, $path)
 	{
-		$filters = parent::findPatternFilters($request);
+		$filters = parent::findPatternFilters($method, $path);
 
 		foreach ($this->httpVerbFilters as $verb => $values)
 		{
-			if ($verb == strtolower($request->getMethod()))
+			if ($verb == strtolower($method))
 			{
 				$filters = array_merge($filters, $values);
 			}
