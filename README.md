@@ -179,6 +179,9 @@ Route::group(array('prefix' => '{locale}'), function()
 
 ## Changes
 
+#### v1.0.4
+- Upgraded Illuminate dependencies to be Laravel 4.1 and 4.0 compatible.
+
 #### v1.0.3
 - Fixed a change that was made to the original Laravel router.
 
